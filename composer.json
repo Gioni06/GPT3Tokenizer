@@ -8,6 +8,9 @@
     "issues": "https://github.com/Gioni06/gpt3-tokenizer/issues",
     "source": "https://github.com/Gioni06/gpt3-tokenizer"
   },
+  "scripts": {
+    "test": "vendor/bin/phpunit tests"
+  },
   "authors": [
     {
       "name": "Jonas Duri",
