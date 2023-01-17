@@ -5,10 +5,17 @@ This is a PHP port of the GPT-3 tokenizer. It is based on the [original Python i
 GPT-2 and GPT-3 use a technique called byte pair encoding to convert text into a sequence of integers, which are then used as input for the model.
 When you interact with the OpenAI API, you may find it useful to calculate the amount of tokens in a given text before sending it to the API.
 
+## Installation
+Install the package from [Packagist](https://packagist.org/packages/gioni06/gpt3-tokenizer) using Composer:
+
+```bash
+composer require gioni06/gpt3-tokenizer
+```
+
 ## Encode a text
 
 ```php
-use Gioni06\GPT3Tokenizer;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $text = "This is some text";
 $tokens = GPT3Tokenizer::encode($text);
@@ -18,7 +25,7 @@ $tokens = GPT3Tokenizer::encode($text);
 ## Decode a text
 
 ```php
-use Gioni06\GPT3Tokenizer;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $tokens = [1212,318,617,2420]
 $text = GPT3Tokenizer::decode($tokens);
@@ -28,7 +35,7 @@ $text = GPT3Tokenizer::decode($tokens);
 ## Count the number of tokens in a text
 
 ```php
-use Gioni06\GPT3Tokenizer;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $text = "This is some text";
 $numberOfTokens = GPT3Tokenizer::count($text);
