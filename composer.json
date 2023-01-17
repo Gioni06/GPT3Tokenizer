@@ -1,12 +1,12 @@
 {
   "name": "gioni06/gpt3-tokenizer",
-  "description": "The Laravel Framework.",
+  "description": "PHP package for Byte Pair Encoding (BPE) used by GPT-3.",
   "keywords": ["gpt-3", "openai", "gpt-2", "tokenizer", "encode", "decode"],
-  "license": "MIT",
-  "homepage": "https://github.com/Gioni06/gpt3-tokenizer",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Gioni06/GPT3Tokenizer",
   "support": {
-    "issues": "https://github.com/Gioni06/gpt3-tokenizer/issues",
-    "source": "https://github.com/Gioni06/gpt3-tokenizer"
+    "issues": "https://github.com/Gioni06/GPT3Tokenizer/issues",
+    "source": "https://github.com/Gioni06/GPT3Tokenizer"
   },
   "scripts": {
     "test": "vendor/bin/phpunit tests"
