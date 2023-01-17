@@ -5,6 +5,10 @@ This is a PHP port of the GPT-3 tokenizer. It is based on the [original Python i
 GPT-2 and GPT-3 use a technique called byte pair encoding to convert text into a sequence of integers, which are then used as input for the model.
 When you interact with the OpenAI API, you may find it useful to calculate the amount of tokens in a given text before sending it to the API.
 
+What's next:
+- Caching for performance improvements
+- Ability to work with user provided vobabulary files
+
 ## Encode a text
 
 ```php
