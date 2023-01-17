@@ -12,6 +12,10 @@ Install the package from [Packagist](https://packagist.org/packages/gioni06/gpt3
 composer require gioni06/gpt3-tokenizer
 ```
 
+What's next:
+- Caching for performance improvements
+- Ability to work with user provided vocabulary files
+
 ## Encode a text
 
 ```php
