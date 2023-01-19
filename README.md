@@ -21,10 +21,6 @@ https://stackoverflow.com/questions/46448294/phpunit-coverage-allowed-memory-siz
 -d memory_limit=-1
 ```
 
-## What's next
-- Caching for performance improvements
-- Ability to work with user provided vocabulary files
-
 ## Encode a text
 
 ```php
