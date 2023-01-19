@@ -2,15 +2,28 @@
 
 namespace Gioni06\Gpt3Tokenizer;
 class Merges {
-    private array $merges;
-
-    public function __construct(string $path = __DIR__ . '/pretrained_vocab_files/merges.txt')
+    public function __construct(private string $path = __DIR__ . '/pretrained_vocab_files/merges.txt')
     {
-        $this->merges = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     }
 
-    public function lines()
+    public function bpeMerges(): array
     {
-        return $this->merges;
+        $lines = [];
+        $fp = @fopen($this->path, "r");
+        if ($fp) {
+            // drop the first line of the buffer
+            fgets($fp, 300);
+            while (($buffer = fgets($fp, 300)) !== false) {
+                $line = array_filter(preg_split("/(\s+)/", $buffer), function($e) {
+                    return strlen(trim($e)) > 0;
+                });
+                $lines[] = $line;
+            }
+            if (!feof($fp)) {
+                throw new Exception("Error: unexpected fgets() fail\n");
+            }
+            fclose($fp);
+        }
+        return $lines;
     }
 }

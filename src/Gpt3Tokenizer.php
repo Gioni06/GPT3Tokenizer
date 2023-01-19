@@ -4,13 +4,70 @@ namespace Gioni06\Gpt3Tokenizer;
 
 class Gpt3Tokenizer
 {
+    private mixed $vocab;
+    private array $bpeMerges;
+    private array $bpe_ranks;
+    private bool $apcuAvailable;
+
+    private array $cache = [];
+
+    private bool $useCache;
+
+
+    public function __construct(Gpt3TokenizerConfig $config)
+    {
+        $vocabPath = $config->getConfig()['vocabPath'];
+        $vocab = new Vocab($vocabPath);
+        $this->vocab = $vocab->data();
+        // Free memory that is no longer needed
+        unset($vocab);
+
+        $mergesPath = $config->getConfig()['mergesPath'];
+        $merges = new Merges($mergesPath);
+        $this->bpeMerges = $merges->bpeMerges();
+        $this->bpe_ranks = array_combine(Gpt3Tokenizer::zipBpe($this->bpeMerges), range(0, count($this->bpeMerges) - 1));
+        // Free memory that is no longer needed
+        unset($this->bpeMerges);
+        unset($merges);
+
+        $this->apcuAvailable = function_exists('apcu_enabled') && apcu_enabled();
+        $this->useCache = $config->getConfig()['useCache'];
+    }
+
+    private function cacheSet($key, $val): void
+    {
+        if ($this->apcuAvailable) {
+            apcu_store($key, $val);
+        } else {
+            $this->cache[$key] = $val;
+        }
+    }
+
+    private function cacheGet($key): mixed
+    {
+        if ($this->apcuAvailable) {
+            return apcu_fetch($key);
+        } else {
+            return $this->cache[$key] ?? null;
+        }
+    }
+
+    private function cacheExists($key): array|bool
+    {
+        if ($this->apcuAvailable) {
+            return apcu_exists($key);
+        } else {
+            return isset($this->cache[$key]);
+        }
+    }
+
     public static function bytes_to_unicode(): array
     {
         $bs = array_merge(range(mb_ord('!'), mb_ord('~') + 1), range(mb_ord('¡'), mb_ord('¬') + 1), range(mb_ord('®'), mb_ord('ÿ') + 1));
 
         $cs = $bs;
         $n = 0;
-        for ($b = 0; $b < 2 ** 8; $b++) {
+        foreach (range(0, 2 ** 8 - 1) as $b) {
             if (!in_array($b, $bs)) {
                 $bs[] = $b;
                 $cs[] = 2 ** 8 + $n;
@@ -26,6 +83,7 @@ class Gpt3Tokenizer
         array_map(function($_, $i) use(&$result, $bs, $cs) {
             $result[$bs[$i]] = $cs[$i];
         }, $bs, array_keys($cs));
+
         if (array_key_exists(256, $result)) {
             unset($result[256]);
         }
@@ -47,13 +105,6 @@ class Gpt3Tokenizer
         return implode($bytes);
     }
 
-    public static function bpeMerges(array $lines): array
-    {
-        return array_map(function($x) {
-            return array_filter(preg_split("/(\s+)/", $x), function($e) { return strlen(trim($e)) > 0; });
-        }, array_slice($lines, 1, count($lines) - 1));
-    }
-
     public static function get_pairs($input_arr): array
     {
         $pairs = array();
@@ -73,20 +124,13 @@ class Gpt3Tokenizer
         return $bpe;
     }
 
-    public static function dictZip(array $x, array $y): array
+    public function bpe(string $token): string
     {
-        return array_combine($x, $y);
-    }
+        if($this->useCache && $this->cacheExists($token)) {
+            return $this->cacheGet($token);
+        }
 
-    public static function splitString($string): array|bool|null
-    {
-        return mb_str_split($string);
-    }
-    public static function bpe(string $token): string
-    {
-        $bpeMerges = Gpt3Tokenizer::bpeMerges((new Merges())->lines());
-        $bpe_ranks = Gpt3Tokenizer::dictZip(Gpt3Tokenizer::zipBpe($bpeMerges), range(0, count($bpeMerges) - 1));
-        $chars = self::splitString($token);
+        $chars = mb_str_split($token);
         $pairs = self::get_pairs($chars);
         if(!count($pairs)) {
             return implode(" ", $chars);
@@ -96,8 +140,8 @@ class Gpt3Tokenizer
             $minPairs = [];
             foreach ($pairs as $pair) {
                 $pairStr = implode(",", $pair);
-                if (array_key_exists($pairStr, $bpe_ranks)) {
-                    $minPairs[$bpe_ranks[$pairStr]] = $pair;
+                if (array_key_exists($pairStr, $this->bpe_ranks)) {
+                    $minPairs[$this->bpe_ranks[$pairStr]] = $pair;
                 } else {
                     $minPairs[10e10] = $pair;
                 }
@@ -109,7 +153,7 @@ class Gpt3Tokenizer
             }, array_keys($minPairs)))];
 
             $bigramStr = implode(",", $bigram);
-            if (!array_key_exists($bigramStr, $bpe_ranks)) {
+            if (!array_key_exists($bigramStr, $this->bpe_ranks)) {
                 break;
             }
 
@@ -142,12 +186,15 @@ class Gpt3Tokenizer
                 $pairs = self::get_pairs($chars);
             }
         }
-        return implode(" ", $chars);
+        $result = implode(" ", $chars);
+        if($this->useCache) {
+            $this->cacheSet($token, $result);
+        }
+        return $result;
     }
 
-    public static function encode(string $text): array
+    public function encode(string $text): array
     {
-        $encoder = (new Vocab())->data();
         $byte_encoder = self::bytes_to_unicode();
         $pat = "/'s|'t|'re|'ve|'m|'ll|'d| ?[[:alpha:]]+| ?[[:digit:]]+| ?[^[:space:]\pL\pN]+|\s+(?!\S)|\s+/u";
         $bpe_tokens = array();
@@ -158,18 +205,17 @@ class Gpt3Tokenizer
                 return $byte_encoder[$x];
             }, self::encodeStr($token)));
 
-            $new_tokens = array_map(function($x) use ($encoder) {
-                return $encoder[$x];
-            }, explode(' ', self::bpe($token)));
+            $new_tokens = array_map(function($x) {
+                return $this->vocab[$x];
+            }, explode(' ', $this->bpe($token)));
             $bpe_tokens = array_merge($bpe_tokens, $new_tokens);
         }
         return $bpe_tokens;
     }
 
-    public static function decode(array $tokens): string
+    public function decode(array $tokens): string
     {
-        $encoder = (new Vocab())->data();
-        $decoder = array_flip($encoder);
+        $decoder = array_flip($this->vocab);
         $byte_decoder = array_flip(self::bytes_to_unicode());
 
         $text = array_map(function($x) use ($decoder) {
@@ -177,7 +223,7 @@ class Gpt3Tokenizer
         }, $tokens);
 
         $text = implode($text);
-        $chars = self::splitString($text);
+        $chars = mb_str_split($text);
         $decodedChars = array();
         for ($i = 0; $i < count($chars); $i++) {
             $decodedChars[] = $byte_decoder[$chars[$i]];
@@ -185,10 +231,9 @@ class Gpt3Tokenizer
         return self::decodeStr($decodedChars);
     }
 
-    public static function count(string $text): int
+    public function count(string $text): int
     {
         $tokens = self::encode($text);
         return count($tokens);
     }
-    public function __construct(){}
 }
