@@ -19,8 +19,7 @@
   ],
   "require": {
     "php": "^8.0.2",
-    "ext-mbstring": "*",
-    "ext-apcu": "*"
+    "ext-mbstring": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5.8"
