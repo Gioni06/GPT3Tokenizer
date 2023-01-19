@@ -18,12 +18,34 @@ composer require gioni06/gpt3-tokenizer
 Loading the vocabulary files consumes a lot of memory. You might need to increase the phpunit memory limit.
 https://stackoverflow.com/questions/46448294/phpunit-coverage-allowed-memory-size-of-536870912-bytes-exhausted
 ```bash
--d memory_limit=-1
+./vendor/bin/phpunit -d memory_limit=-1 tests/
 ```
+
+## Use the configuration Class
+
+```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
+
+// default vocab path
+// default merges path
+// caching enabled
+$defaultConfig = new Gpt3TokenizerConfig();
+
+$customConfig = new Gpt3TokenizerConfig();
+$customConfig
+    ->vocabPath('custom_vocab.json') // path to a custom vocabulary file
+    ->mergesPath('custom_merges.txt') // path to a custom merges file
+    ->useCache(false)
+```
+
+### A note on caching
+The tokenizer will try to use `apcu` for caching, if that is not available it will use a plain PHP `array`.
+You will see slightly better performance for long texts when using the cache. The cache is enabled by default.
 
 ## Encode a text
 
 ```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $config = new Gpt3TokenizerConfig();
@@ -36,6 +58,7 @@ $tokens = $tokenizer->encode($text);
 ## Decode a text
 
 ```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $config = new Gpt3TokenizerConfig();
@@ -48,6 +71,7 @@ $text = $tokenizer->decode($tokens);
 ## Count the number of tokens in a text
 
 ```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 $config = new Gpt3TokenizerConfig();
