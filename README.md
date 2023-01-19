@@ -14,7 +14,14 @@ Install the package from [Packagist](https://packagist.org/packages/gioni06/gpt3
 composer require gioni06/gpt3-tokenizer
 ```
 
-What's next:
+## Testing
+Loading the vocabulary files consumes a lot of memory. You might need to increase the phpunit memory limit.
+https://stackoverflow.com/questions/46448294/phpunit-coverage-allowed-memory-size-of-536870912-bytes-exhausted
+```bash
+-d memory_limit=-1
+```
+
+## What's next
 - Caching for performance improvements
 - Ability to work with user provided vocabulary files
 
@@ -23,8 +30,10 @@ What's next:
 ```php
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
+$config = new Gpt3TokenizerConfig();
+$tokenizer = new Gpt3Tokenizer($config);
 $text = "This is some text";
-$tokens = GPT3Tokenizer::encode($text);
+$tokens = $tokenizer->encode($text);
 // [1212,318,617,2420]
 ```
 
@@ -33,8 +42,10 @@ $tokens = GPT3Tokenizer::encode($text);
 ```php
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
+$config = new Gpt3TokenizerConfig();
+$tokenizer = new Gpt3Tokenizer($config);
 $tokens = [1212,318,617,2420]
-$text = GPT3Tokenizer::decode($tokens);
+$text = $tokenizer->decode($tokens);
 // "This is some text"
 ```
 
@@ -43,8 +54,10 @@ $text = GPT3Tokenizer::decode($tokens);
 ```php
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
+$config = new Gpt3TokenizerConfig();
+$tokenizer = new Gpt3Tokenizer($config);
 $text = "This is some text";
-$numberOfTokens = GPT3Tokenizer::count($text);
+$numberOfTokens = $tokenizer->count($text);
 // 4
 ```
 
