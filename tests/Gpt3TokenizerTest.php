@@ -143,7 +143,7 @@ EOT;
         $this->assertFalse($config->getConfig()['useCache']);
     }
 
-    public function test_regression_issue_3()
+    public function test_regression_issue_5()
     {
         $config = new Gpt3TokenizerConfig();
         $tokenizer = new Gpt3Tokenizer($config);
