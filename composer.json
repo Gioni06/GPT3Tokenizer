@@ -9,7 +9,7 @@
     "source": "https://github.com/Gioni06/GPT3Tokenizer"
   },
   "scripts": {
-    "test": "vendor/bin/phpunit tests"
+    "test": "vendor/bin/phpunit -d memory_limit=-1 tests"
   },
   "authors": [
     {

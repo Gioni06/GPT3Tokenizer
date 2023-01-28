@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
+
 namespace Gioni06\Gpt3Tokenizer\Tests;
 
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
@@ -19,6 +20,7 @@ class Gpt3TokenizerTest extends TestCase {
     {
         $this->assertEquals([ '32', '119', '111', '114', '108', '100' ], Gpt3Tokenizer::encodeStr(" world"));
         $this->assertEquals([ '32', '240', '159', '140', '141' ], Gpt3Tokenizer::encodeStr(" 🌍"));
+        $this->assertEquals([ '240', '159', '148', '173' ], Gpt3Tokenizer::encodeStr("🔭"));
     }
 
 
@@ -26,6 +28,7 @@ class Gpt3TokenizerTest extends TestCase {
     {
         $this->assertEquals(" world", Gpt3Tokenizer::decodeStr([ '32', '119', '111', '114', '108', '100' ]));
         $this->assertEquals(" 🌍", Gpt3Tokenizer::decodeStr([ '32', '240', '159', '140', '141' ]));
+        $this->assertEquals("🔭", Gpt3Tokenizer::decodeStr([ '240', '159', '148', '173' ]));
     }
 
     public function test_get_pairs_function()
@@ -58,6 +61,7 @@ class Gpt3TokenizerTest extends TestCase {
         $this->assertEquals("d", Gpt3Tokenizer::bytes_to_unicode()[100]);
         $this->assertEquals("È", Gpt3Tokenizer::bytes_to_unicode()[200]);
         $this->assertEquals("ÿ", Gpt3Tokenizer::bytes_to_unicode()[255]);
+        $this->assertCount(256, Gpt3Tokenizer::bytes_to_unicode());
     }
 
     /*
@@ -137,5 +141,13 @@ EOT;
         $this->assertStringEndsWith('merges_example.txt', $config->getConfig()['mergesPath']);
         $this->assertStringEndsWith('vocab.json', $config->getConfig()['vocabPath']);
         $this->assertFalse($config->getConfig()['useCache']);
+    }
+
+    public function test_regression_issue_3()
+    {
+        $config = new Gpt3TokenizerConfig();
+        $tokenizer = new Gpt3Tokenizer($config);
+        $tokens = $tokenizer->encode("🔭");
+        $this->assertEquals([8582, 242, 255], $tokens);
     }
 }
