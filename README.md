@@ -7,6 +7,12 @@ When you interact with the OpenAI API, you may find it useful to calculate the a
 
 If you want to learn more, read the [Summary of the tokenizers](https://huggingface.co/docs/transformers/tokenizer_summary) from Hugging Face.
 
+## Support ⭐️
+
+If you find my work useful, I would be thrilled if you could show your support by giving this project a star ⭐️. 
+It only takes a second and it would mean a lot to me. Your star will not only make me feel warm and fuzzy inside, but it will also help reach more people who can benefit from this project.
+
+
 ## Installation
 Install the package from [Packagist](https://packagist.org/packages/gioni06/gpt3-tokenizer) using Composer:
 
