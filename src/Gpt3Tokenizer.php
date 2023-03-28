@@ -4,6 +4,7 @@ namespace Gioni06\Gpt3Tokenizer;
 
 class Gpt3Tokenizer
 {
+    const PAT_REGEX = "/'s|'t|'re|'ve|'m|'ll|'d| ?[[:alpha:]]+| ?[[:digit:]]+| ?[^[:space:]\pL\pN]+|\s+(?!\S)|\s+/u";
     private mixed $vocab;
     private array $bpeMerges;
     private array $bpe_ranks;
@@ -434,10 +435,9 @@ class Gpt3Tokenizer
     public function encode(string $text): array
     {
         $byte_encoder = self::bytes_to_unicode();
-        $pat = "/'s|'t|'re|'ve|'m|'ll|'d| ?[[:alpha:]]+| ?[[:digit:]]+| ?[^[:space:]\pL\pN]+|\s+(?!\S)|\s+/u";
         $bpe_tokens = array();
         $matches = array();
-        preg_match_all($pat, $text, $matches);
+        preg_match_all(self::PAT_REGEX, $text, $matches);
         foreach ($matches[0] as $token) {
             $token = implode(array_map(function($x) use ($byte_encoder) {
                 return $byte_encoder[$x];
@@ -449,6 +449,56 @@ class Gpt3Tokenizer
             $bpe_tokens = array_merge($bpe_tokens, $new_tokens);
         }
         return $bpe_tokens;
+    }
+
+    /**
+     * Split $text into chunks of up to $maxTokenPerChunk tokens.
+     * Unicode characters that map to multiple tokens are kept in the same chunk.
+     *
+     * @return array<array<int>>
+     */
+    public function encodeInChunks(string $text, int $maxTokenPerChunk): array
+    {
+        $byte_encoder = self::bytes_to_unicode();
+
+        $bpe_tokens_chunks = array();
+        $bpe_tokens_current_chunk = array();
+
+        $matches = array();
+        preg_match_all(self::PAT_REGEX, $text, $matches);
+        foreach ($matches[0] as $token) {
+            $token = implode(array_map(function($x) use ($byte_encoder) {
+                return $byte_encoder[$x];
+            }, self::encodeStr($token)));
+
+            $new_tokens = array_map(function($x) {
+                return $this->vocab[$x];
+            }, explode(' ', $this->bpe($token)));
+
+            if ((count($bpe_tokens_current_chunk) + count($new_tokens)) > $maxTokenPerChunk) {
+                $bpe_tokens_chunks[] = $bpe_tokens_current_chunk;
+                $bpe_tokens_current_chunk = array();
+            }
+
+            $bpe_tokens_current_chunk = array_merge($bpe_tokens_current_chunk, $new_tokens);
+        }
+
+        if (count($bpe_tokens_current_chunk) > 0) {
+            $bpe_tokens_chunks[] = $bpe_tokens_current_chunk;
+        }
+
+        return $bpe_tokens_chunks;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function chunk(string $text, int $maxTokenPerChunk): array
+    {
+        return array_map(
+            [$this, 'decode'],
+            $this->encodeInChunks($text, $maxTokenPerChunk)
+        );
     }
 
     public function decode(array $tokens): string
