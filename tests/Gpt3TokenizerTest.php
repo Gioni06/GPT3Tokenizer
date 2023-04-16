@@ -166,4 +166,29 @@ EOT;
         $tokens = $tokenizer->encode($openAiExample);
         $this->assertEquals([7085, 2456, 3975, 284, 530, 11241, 11, 475, 617, 836, 470, 25, 773, 452, 12843, 13, 198, 198, 3118, 291, 1098, 3435, 588, 795, 13210, 271, 743, 307, 6626, 656, 867, 16326, 7268, 262, 10238, 9881, 25, 12520, 97, 248, 8582, 237, 122, 198, 198, 44015, 3007, 286, 3435, 8811, 1043, 1306, 284, 1123, 584, 743, 307, 32824, 1978, 25, 17031, 2231, 30924, 3829], $tokens);
     }
+
+    public function test_chunk()
+    {
+        $config = new Gpt3TokenizerConfig();
+        $tokenizer = new Gpt3Tokenizer($config);
+        $text = "1 2 hello，world 3 4";
+
+        // "，" maps to 3 tokens, we want to make sure they end up in the same chunk
+        $this->assertEquals(
+            [
+                [16, 362, 23748],
+                [171, 120, 234, 6894, 513],
+                [604],
+            ],
+            $tokenizer->encodeInChunks($text, 5)
+        );
+        $this->assertEquals(
+            [
+                '1 2 hello',
+                '，world 3',
+                ' 4',
+            ],
+            $tokenizer->chunk($text, 5)
+        );
+    }
 }
