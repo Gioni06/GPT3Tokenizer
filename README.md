@@ -87,5 +87,36 @@ $numberOfTokens = $tokenizer->count($text);
 // 4
 ```
 
+## Encode a given text into chunks of tokens, with each chunk containing a specified maximum number of tokens.
+
+This method is useful when handling large texts that need to be divided into smaller chunks for further processing.
+
+
+```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
+
+$config = new Gpt3TokenizerConfig();
+$tokenizer = new Gpt3Tokenizer($config);
+$text = "1 2 hello，world 3 4";
+$tokenizer->encodeInChunks($text, 5)
+// [[16, 362, 23748], [171, 120, 234, 6894, 513], [604]]
+```
+
+## Takes a given text and chunks it into encoded segments, with each segment containing a specified maximum number of tokens.
+
+This method leverages the encodeInChunks method for encoding the text into Byte-Pair Encoded (BPE) tokens and then decodes these tokens back into text.
+
+```php
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
+
+$config = new Gpt3TokenizerConfig();
+$tokenizer = new Gpt3Tokenizer($config);
+$text = "1 2 hello，world 3 4";
+$tokenizer->chunk($text, 5)
+// ['1 2 hello', '，world 3', ' 4']
+```
+
 ## License
 This project uses the Apache License 2.0 license. See the [LICENSE](LICENSE) file for more information.

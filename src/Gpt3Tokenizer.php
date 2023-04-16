@@ -452,10 +452,11 @@ class Gpt3Tokenizer
     }
 
     /**
-     * Split $text into chunks of up to $maxTokenPerChunk tokens.
-     * Unicode characters that map to multiple tokens are kept in the same chunk.
-     *
-     * @return array<array<int>>
+     * Encodes a given text into chunks of Byte-Pair Encoded (BPE) tokens, with each chunk containing a specified
+     * maximum number of tokens.
+     * @param string $text The input text to be encoded.
+     * @param int $maxTokenPerChunk The maximum number of tokens allowed per chunk.
+     * @return int[][] An array of arrays containing BPE token chunks.
      */
     public function encodeInChunks(string $text, int $maxTokenPerChunk): array
     {
@@ -491,7 +492,11 @@ class Gpt3Tokenizer
     }
 
     /**
-     * @return array<string>
+     * Takes a given text and chunks it into encoded segments, with each segment containing a specified maximum
+     * number of tokens.
+     * @param string $text The input text to be encoded.
+     * @param int $maxTokenPerChunk The maximum number of tokens allowed per chunk.
+     * @return string[] An array of strings containing the encoded text.
      */
     public function chunk(string $text, int $maxTokenPerChunk): array
     {
