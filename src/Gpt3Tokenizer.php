@@ -5,14 +5,14 @@ namespace Gioni06\Gpt3Tokenizer;
 class Gpt3Tokenizer
 {
     const PAT_REGEX = "/'s|'t|'re|'ve|'m|'ll|'d| ?[[:alpha:]]+| ?[[:digit:]]+| ?[^[:space:]\pL\pN]+|\s+(?!\S)|\s+/u";
-    private mixed $vocab;
-    private array $bpeMerges;
-    private array $bpe_ranks;
-    private bool $apcuAvailable;
+    private $vocab;
+    private $bpeMerges;
+    private $bpe_ranks;
+    private $apcuAvailable;
 
-    private array $cache = [];
+    private $cache = [];
 
-    private bool $useCache;
+    private $useCache;
 
 
     public function __construct(Gpt3TokenizerConfig $config)
@@ -45,7 +45,7 @@ class Gpt3Tokenizer
         }
     }
 
-    private function cacheGet($key): mixed
+    private function cacheGet($key)
     {
         if ($this->apcuAvailable) {
             /** @noinspection PhpComposerExtensionStubsInspection */
@@ -55,7 +55,7 @@ class Gpt3Tokenizer
         }
     }
 
-    private function cacheExists($key): array|bool
+    private function cacheExists($key)
     {
         if ($this->apcuAvailable) {
             /** @noinspection PhpComposerExtensionStubsInspection */
@@ -330,15 +330,17 @@ class Gpt3Tokenizer
         ];
     }
 
-    public static function encodeStr(string $str): array {
+    public static function encodeStr(string $str): array
+    {
         $bytes = str_split(bin2hex(mb_convert_encoding($str, 'UTF-8')), 2);
-        return array_map(function($byte){
+        return array_map(function ($byte) {
             return hexdec($byte);
-        },$bytes);
+        }, $bytes);
     }
 
-    public static function decodeStr(array $codes): string {
-        $bytes = array_map(function($code) {
+    public static function decodeStr(array $codes): string
+    {
+        $bytes = array_map(function ($code) {
             return chr($code);
         }, $codes);
         return implode($bytes);
@@ -365,13 +367,13 @@ class Gpt3Tokenizer
 
     public function bpe(string $token): string
     {
-        if($this->useCache && $this->cacheExists($token)) {
+        if ($this->useCache && $this->cacheExists($token)) {
             return $this->cacheGet($token);
         }
 
         $chars = mb_str_split($token);
         $pairs = self::get_pairs($chars);
-        if(!count($pairs)) {
+        if (!count($pairs)) {
             return implode(" ", $chars);
         }
 
@@ -387,7 +389,7 @@ class Gpt3Tokenizer
             }
             ksort($minPairs);
 
-            $bigram = $minPairs[min(array_map(function($x) {
+            $bigram = $minPairs[min(array_map(function ($x) {
                 return intval($x);
             }, array_keys($minPairs)))];
 
@@ -426,7 +428,7 @@ class Gpt3Tokenizer
             }
         }
         $result = implode(" ", $chars);
-        if($this->useCache) {
+        if ($this->useCache) {
             $this->cacheSet($token, $result);
         }
         return $result;
@@ -439,11 +441,11 @@ class Gpt3Tokenizer
         $matches = array();
         preg_match_all(self::PAT_REGEX, $text, $matches);
         foreach ($matches[0] as $token) {
-            $token = implode(array_map(function($x) use ($byte_encoder) {
+            $token = implode(array_map(function ($x) use ($byte_encoder) {
                 return $byte_encoder[$x];
             }, self::encodeStr($token)));
 
-            $new_tokens = array_map(function($x) {
+            $new_tokens = array_map(function ($x) {
                 return $this->vocab[$x];
             }, explode(' ', $this->bpe($token)));
             $bpe_tokens = array_merge($bpe_tokens, $new_tokens);
@@ -468,11 +470,11 @@ class Gpt3Tokenizer
         $matches = array();
         preg_match_all(self::PAT_REGEX, $text, $matches);
         foreach ($matches[0] as $token) {
-            $token = implode(array_map(function($x) use ($byte_encoder) {
+            $token = implode(array_map(function ($x) use ($byte_encoder) {
                 return $byte_encoder[$x];
             }, self::encodeStr($token)));
 
-            $new_tokens = array_map(function($x) {
+            $new_tokens = array_map(function ($x) {
                 return $this->vocab[$x];
             }, explode(' ', $this->bpe($token)));
 
@@ -511,7 +513,7 @@ class Gpt3Tokenizer
         $decoder = array_flip($this->vocab);
         $byte_decoder = array_flip(self::bytes_to_unicode());
 
-        $text = array_map(function($x) use ($decoder) {
+        $text = array_map(function ($x) use ($decoder) {
             return $decoder[$x];
         }, $tokens);
 
