@@ -1,6 +1,8 @@
 <?php
 
 namespace Gioni06\Gpt3Tokenizer;
+use Exception;
+
 class Merges
 {
     private $path;
