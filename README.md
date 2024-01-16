@@ -7,6 +7,10 @@ When you interact with the OpenAI API, you may find it useful to calculate the a
 
 If you want to learn more, read the [Summary of the tokenizers](https://huggingface.co/docs/transformers/tokenizer_summary) from Hugging Face.
 
+## tl;dr 🤖
+
+There is a [Custom GPT for ChatGPT](https://chat.openai.com/g/g-e01hGLh44-gpt3tokenizer-guide) that can help you interate this project in your software
+
 ## Support ⭐️
 
 If you find my work useful, I would be thrilled if you could show your support by giving this project a star ⭐️. 
