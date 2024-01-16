@@ -9,7 +9,7 @@ If you want to learn more, read the [Summary of the tokenizers](https://huggingf
 
 ## tl;dr 🤖
 
-There is a [Custom GPT for ChatGPT](https://chat.openai.com/g/g-e01hGLh44-gpt3tokenizer-guide) that can help you interate this project in your software
+There is a [Custom GPT for ChatGPT](https://chat.openai.com/g/g-e01hGLh44-gpt3tokenizer-guide) that can help you use this package in your software
 
 ## Support ⭐️
 
